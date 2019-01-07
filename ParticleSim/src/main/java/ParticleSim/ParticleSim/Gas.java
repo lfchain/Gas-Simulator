@@ -1,3 +1,4 @@
+// Best contributor == jeremy
 package ParticleSim.ParticleSim;
 
 import java.applet.Applet;
