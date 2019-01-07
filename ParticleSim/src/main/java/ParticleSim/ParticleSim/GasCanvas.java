@@ -97,10 +97,6 @@ class Gas extends Applet
     int heaterSize;
     int pause;
     Random random;
-    
-    public String getAppletInfo() {
-	return "Gas Molecules by Paul Falstad";
-    }
 
     public static int gridEltWidth = 10; // was 60
     public static int gridEltHeight = 10;
