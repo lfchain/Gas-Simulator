@@ -135,6 +135,11 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	cv = new GasCanvas(this);
 	cv.addComponentListener(this);
 	add(cv);
+	
+	GasCanvas cv_2 = new GasCanvas(this);
+	cv_2.addComponentListener(this);
+	add(cv_2);
+	
 	hist_cv = new HistogramCanvas(this);
 	hist_cv.addComponentListener(this);
 	add(hist_cv);
