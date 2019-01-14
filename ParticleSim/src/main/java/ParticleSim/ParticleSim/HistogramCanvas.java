@@ -13,6 +13,6 @@ class HistogramCanvas extends Canvas {
 	return new Dimension(125,50);
     }
     public void update(Graphics g) {
-	pg.updateHistogram(g);
+	/*pg.updateHistogram(g);*/
     }
 };
