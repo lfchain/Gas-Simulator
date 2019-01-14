@@ -18,7 +18,7 @@ public class GasLayout implements LayoutManager {
 	return new Dimension(100,100);
     }
     public void layoutContainer(Container target) {
-	int cw = target.size().width * 2/3;
+	int cw = target.size().width ;
 	target.getComponent(0).move(0, 0);
 	target.getComponent(0).resize(cw, target.size().height-100);
 	target.getComponent(1).move(0, target.size().height-100);
