@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Label;
 import java.awt.Scrollbar;
@@ -42,6 +43,7 @@ import ParticleSim.ParticleSim.Gas.SetupExpansion;
 */
 import ParticleSim.ParticleSim.Gas.SetupTwoSections;
 
+
 public class Gas extends Applet
 implements ComponentListener, ActionListener, AdjustmentListener,
            ItemListener {
@@ -57,8 +59,8 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   int pause;
   Random random;
 
-  public static int gridEltWidth = 200; // was 60
-  public static int gridEltHeight = 200;
+  public static int gridEltWidth = 60; // was 60
+  public static int gridEltHeight = 60;
   int gridWidth;
   int gridHeight;
   Molecule mols[];
@@ -108,6 +110,8 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	return q % x;
   }
   GasCanvas cv;
+//  GasCanvas cv2;
+//  GasCanvas cv3;
   // HistogramCanvas hist_cv;
 
   public void init() {
@@ -140,12 +144,20 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	colors[ci++] = new Color(255,255,191);
 	colors[ci++] = new Color(255,255,255);
 	gravity = 0;
-	//setLayout(new GridLayout(3, 1, 10, 10));
+//	setLayout(new GridLayout(3, 1, 10, 10));
 	setLayout(new GasLayout());
 	cv = new GasCanvas(this);
 	cv.addComponentListener(this);
 	add(cv);
-
+	
+//	cv2 = new GasCanvas(this);
+//	cv2.addComponentListener(this);
+//	add(cv2);
+//
+//	cv3 = new GasCanvas(this);
+//	cv3.addComponentListener(this);
+//	add(cv3);
+	
 	setupChooser = new Choice();
 	int i;
 	for (i = 0; i != setupList.size(); i++)
@@ -286,6 +298,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	// heaterRight = (winSize.width+heaterSize*3)/2;
 	// enableItems();
 	cv.repaint();
+//	cv2.repaint();
 	// hist_cv.repaint();
   }
 
@@ -534,6 +547,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	// if (!stoppedCheck.getState()) {
 	    heatstate += heaterMove;
 	    cv.repaint(pause);
+//	    cv2.repaint(pause);
 	    // hist_cv.repaint(pause);
 	// }
   }
@@ -705,6 +719,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   public void componentResized(ComponentEvent e) {
 	reinit(false);
 	cv.repaint(100);
+//	cv2.repaint(100);
 	// hist_cv.repaint(100);
   }
   public void actionPerformed(ActionEvent e) {
@@ -941,6 +956,8 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 		    bigmol.r = 30;
 		    bigmol.mass = bigmol.r*bigmol.r/2;
 		    bigmol.dx = bigmol.dy = 0;
+		    bigmol.vel = 0;
+		    
 		}
 		Setup createNext() { return null; }
   }
