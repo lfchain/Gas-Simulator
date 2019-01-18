@@ -5,14 +5,19 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 class HistogramCanvas extends Canvas {
+	
     Gas pg;
+    
     HistogramCanvas(Gas p) {
-	pg = p;
+    	pg = p;
     }
+    
     public Dimension getPreferredSize() {
-	return new Dimension(125,50);
+    	return new Dimension(125,50);
     }
+    
     public void update(Graphics g) {
-	/*pg.updateHistogram(g);*/
+    	// pg.updateHistogram(g);
     }
+    
 };

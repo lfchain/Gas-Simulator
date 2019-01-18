@@ -1,8 +1,8 @@
 package ParticleSim.ParticleSim;
 
 import java.applet.Applet;
-import java.awt.Button;
-import java.awt.Checkbox;
+// import java.awt.Button;
+// import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,8 +11,8 @@ import java.awt.Graphics;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.Label;
-import java.awt.Scrollbar;
+// import java.awt.Label;
+// import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -25,6 +25,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 import java.util.Vector;
+import static java.lang.Math.*;
+import java.lang.Math;
 
 import ParticleSim.ParticleSim.Gas.Molecule;
 import ParticleSim.ParticleSim.Gas.Setup;
@@ -41,12 +43,11 @@ import ParticleSim.ParticleSim.Gas.Setup3Random;
 import ParticleSim.ParticleSim.Gas.SetupBrownian;
 import ParticleSim.ParticleSim.Gas.SetupExpansion;
 */
-import ParticleSim.ParticleSim.Gas.SetupTwoSections;
+import ParticleSim.ParticleSim.Gas.SetupBigMolecule;
+import ParticleSim.ParticleSim.Gas.SetupThreeSections;
 
 
-public class Gas extends Applet
-implements ComponentListener, ActionListener, AdjustmentListener,
-           ItemListener {
+public class Gas extends Applet implements ComponentListener, ActionListener, AdjustmentListener, ItemListener {
   
   Thread engine = null;
   int molCount;
@@ -59,13 +60,16 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   int pause;
   Random random;
 
+
   public static int gridEltWidth = 60; // was 60
   public static int gridEltHeight = 60;
+
   int gridWidth;
   int gridHeight;
   Molecule mols[];
   Molecule grid[][];
   Molecule bigmol;
+  Molecule bigmols[];
   
   // Button resetButton;
   // Button expandButton;
@@ -127,19 +131,19 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	int ci = 0;
 	heatstate = 0;
 	colors = new Color[16];
-	colors[ci++] = new Color(46,120,255);
-	colors[ci++] = new Color(79,140,254);
+	colors[ci++] = new Color(46 ,120,255);
+	colors[ci++] = new Color(79 ,140,254);
 	colors[ci++] = new Color(113,142,253);
 	colors[ci++] = new Color(147,145,252);
 	colors[ci++] = new Color(181,105,178);
-	colors[ci++] = new Color(215,64,103);
-	colors[ci++] = new Color(249,23,28);
-	colors[ci++] = new Color(250,101,44);
-	colors[ci++] = new Color(251,139,33);
-	colors[ci++] = new Color(252,178,22);
-	colors[ci++] = new Color(253,216,11);
-	colors[ci++] = new Color(255,255,0);
-	colors[ci++] = new Color(255,255,63);
+	colors[ci++] = new Color(215,64 ,103);
+	colors[ci++] = new Color(249,23 ,28 );
+	colors[ci++] = new Color(250,101,44 );
+	colors[ci++] = new Color(251,139,33 );
+	colors[ci++] = new Color(252,178,22 );
+	colors[ci++] = new Color(253,216,11 );
+	colors[ci++] = new Color(255,255,0  );
+	colors[ci++] = new Color(255,255,63 );
 	colors[ci++] = new Color(255,255,127);
 	colors[ci++] = new Color(255,255,191);
 	colors[ci++] = new Color(255,255,255);
@@ -159,10 +163,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 //	add(cv3);
 	
 	setupChooser = new Choice();
-	int i;
-	for (i = 0; i != setupList.size(); i++)
-	    setupChooser.add("Setup: " +
-			     ((Setup) setupList.elementAt(i)).getName());
+	for (int i = 0; i != setupList.size(); i++)	setupChooser.add("Setup: " + ((Setup) setupList.elementAt(i)).getName());
 	setupChooser.addItemListener(this);
 	add(setupChooser);
 
@@ -206,7 +207,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	gravityBar.addAdjustmentListener(this);
 	*/
 	
-	cv.setBackground(Color.black);
+	cv.setBackground(Color.lightGray);
 	cv.setForeground(heaterColor = Color.lightGray);
 	/*
 	hist_cv.setBackground(Color.black);
@@ -218,9 +219,8 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	// adjustHeaterTemp();
 	// enableItems();
 	try {
-	    String param = getParameter("PAUSE");
-	    if (param != null)
-		pause = Integer.parseInt(param);
+		String param = getParameter("PAUSE");
+	    if (param != null)	pause = Integer.parseInt(param);
 	} catch (Exception e) { }
 	reinit(true);
 	repaint();
@@ -233,6 +233,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   void reinit(boolean newsetup) {
 	if (cv.getSize().width == 0 || setupChooser == null)	return;
 	bigmol = null;
+	bigmols = null;
 	setup = (Setup) setupList.elementAt(setupChooser.getSelectedIndex());
 	if (newsetup) {
 	    // speedBar.setValue(20);
@@ -246,28 +247,28 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   
   void expand() {
 	topWallPos -= 50;
-	if (topWallPos < 0)
-	    topWallPos = 0;
+	if (topWallPos < 0)	topWallPos = 0;
 	// enableItems();
   }
 
   void initMolecules(int speed) {
     Dimension d = winSize = cv.getSize();
-	molCount = 500;
-	upperBound = (int) (winSize.height*(1-setup.getVolume())-1);
-	topWallPos = upperBound;
-	areaHeight = winSize.height-upperBound;
-	mols = new Molecule[maxMolCount];
-	dbimage = createImage(d.width, d.height);
-	gridWidth =  d.width /gridEltWidth+1;
-	gridHeight = d.height/gridEltHeight+1;
-	grid = new Molecule[gridWidth][gridHeight];
+	molCount 	= 500;
+	upperBound 	= (int) (winSize.height*(1-setup.getVolume())-1);
+	topWallPos 	= upperBound;
+	areaHeight 	= winSize.height-upperBound;
+	mols 		= new Molecule[maxMolCount];
+	dbimage 	= createImage(d.width, d.height);
+	gridWidth 	=  d.width /gridEltWidth+1;
+	gridHeight 	= d.height/gridEltHeight+1;
+	grid 		= new Molecule[gridWidth][gridHeight];
 	int i, j;
-	for (i = 0; i != gridWidth; i++)
+	for (i = 0; i != gridWidth; i++) {
 	    for (j = 0; j != gridHeight; j++) {
-		grid[i][j] = new Molecule();
-		grid[i][j].listHead = true;
+			grid[i][j] = new Molecule();
+			grid[i][j].listHead = true;
 	    }
+	}
 	for (i = 0; i != maxMolCount; i++) {
 	    Molecule m = new Molecule();
 	    mols[i] = m;
@@ -275,22 +276,20 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	    m.y = getrand(areaHeight*10)*.1+upperBound;
 	    m.dx = (getrand(100)/99.0-.5);
 	    m.dy = java.lang.Math.sqrt(1-m.dx*m.dx);
-	    if (getrand(10) > 4)
-		m.dy = -m.dy;
+	    if (getrand(10) > 4)	m.dy = -m.dy;
 	    if (speed == SPEED_EXTREME) {
-		double q = ((i & 2) > 0) ? 3 : .1;
-		m.dx *= q;
-		m.dy *= q;
+			double q = ((i & 2) > 0) ? 3 : .1;
+			m.dx *= q;
+			m.dy *= q;
 	    }
 	    if (speed == SPEED_RANDOM) {
-		double q = getrand(101)/50.;
-		m.dx *= q;
-		m.dy *= q;
+			double q = getrand(101)/50.;
+			m.dx *= q;
+			m.dy *= q;
 	    }
 	    if (Double.isNaN(m.dx) || Double.isNaN(m.dy))	System.out.println("nan1");
 	    setColor(m);
-	    if (i < molCount)
-		gridAdd(m);
+	    if (i < molCount)	gridAdd(m);
 	}
 	// heaterTop = winSize.height-5;
 	// heaterSize = winSize.width/4;
@@ -303,7 +302,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   }
 
   void setMoleculeTypes(double mult, int typeCount) {
-	int i, j;
+	int i;
 	for (i = 0; i != maxMolCount; i++) {
 	    Molecule m = mols[i];
 	    m.r *= mult;
@@ -354,37 +353,42 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	for (short i = 0; i != molCount; i++) {
 	    Molecule m = mols[i];
 	    boolean bounce = false;
-	    int ix = (int) m.x;
-	    int iy = (int) m.y;
+	    // int ix = (int) m.x;
+	    // int iy = (int) m.y;
 	    // j = (stoppedCheck.getState()) ? 5 : 0;
-	    j=0;
+	    j = 0;
 	    for (; j < 5; j++) {
 			m.dy += gravity*dt;
 			m.x += m.dx*dt;
 			m.y += m.dy*dt;
 			if (Double.isNaN(m.dx) || Double.isNaN(m.dy))	System.out.println("nan2");
 			int r = m.r;
-			if (m.x < r || m.x >= winSize.width-r) {
-			    wallF += Math.abs(m.dx)*m.mass;
-			    m.dx = -m.dx;
-			    if (m.x < m.r) m.x = m.r;
-			    if (m.x >= winSize.width-r)
-				m.x = winSize.width-r-1;
-			    setColor(m);
-			    bounce = true;
-			}
-			if (m.y < upperBound+r || m.y >= winSize.height-r) {
-			    wallF += Math.abs(m.dy)*m.mass;
-			    if (m.y < upperBound+r) m.y = upperBound+r;
-			    if (m.y >= winSize.height-r)
-				m.y = winSize.height-r-1;
-				m.dy = -m.dy;
-			    setColor(m);
-			    bounce = true;
-			}
+			if(bigmols != null && m.mass >10){
+		    	m.dx = 0;
+		    	m.dy = 0;
+		    }else{
+				if (m.x < r || m.x >= winSize.width-r) {
+				    wallF += Math.abs(m.dx)*m.mass;
+				    m.dx = -m.dx;
+				    if (m.x < m.r) m.x = m.r;
+				    if (m.x >= winSize.width-r)
+					m.x = winSize.width-r-1;
+				    setColor(m);
+				    bounce = true;
+				}
+				if (m.y < upperBound+r || m.y >= winSize.height-r) {
+				    wallF += Math.abs(m.dy)*m.mass;
+				    if (m.y < upperBound+r) m.y = upperBound+r;
+				    if (m.y >= winSize.height-r)
+					m.y = winSize.height-r-1;
+					m.dy = -m.dy;
+				    setColor(m);
+				    bounce = true;
+				}
+		    }
+			/*
 			int nix = (int) m.x;
 			int niy = (int) m.y;
-			/*
 			if (!bounce && nix >= heaterLeft && nix <= heaterRight && niy >= heaterTop-1 && heaterCheck.getState()) {
 			    double v = java.lang.Math.sqrt(m.dx*m.dx+m.dy*m.dy);
 			    double oldy = m.dy;
@@ -416,6 +420,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 					if (m.dx == 0 && m.dy == 0)	continue;
 					m.dx += .001;
 			    }
+			    
 			    double sdx = m.dx-m2.dx;
 			    double sx  = m.x -m2.x;
 			    double sdy = m.dy-m2.dy;
@@ -432,8 +437,13 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	
 			    // backtrack m to where they collided.
 			    // (t is typically negative.)
-			    m.x += t*m.dx;
-			    m.y += t*m.dy;
+			    if(bigmols != null && m.mass >10){
+			    	m.dx = 0;
+			    	m.dy = 0;
+			    }else{
+				    m.x += t*m.dx;
+				    m.y += t*m.dy;
+			    }
 	
 			    // ok, so now they are just touching.  find vector
 			    // separating their centers and normalize it.
@@ -461,11 +471,19 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 			    double py = 2*syn*pn;
 	
 			    // subtract this vector from m's momentum
-			    m.dx -= px;
-			    m.dy -= py;
+			    if(bigmols != null && m.mass >10){
+			    	
+			    }else{
+			    	 m.dx -= px;
+					 m.dy -= py;
+			    }
+			   
 			    if (Double.isNaN(m.dx))
 				System.out.println("nan0 " + sxynorm + " " + pn);
 	
+			    if(bigmols != null && m.mass >10 ||bigmols != null && m2.mass >10 ){
+			    	continue;
+			    }
 			    // adjust m2's momentum so that total momentum
 			    // is conserved
 			    double mult = m.mass/m2.mass;
@@ -476,8 +494,13 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	
 			    // send m on its way
 			    if (t < 0) {
-				m.x -= t*m.dx;
-				m.y -= t*m.dy;
+			    	if(bigmols != null && m.mass >10){
+			    		m.x -= t*m.dx;
+						m.y -= t*m.dy;
+				    }else{
+				    	m.x -= t*m.dx;
+						m.y -= t*m.dy;
+				    }
 			    }
 			    if (m.x < r)
 				m.x = r;
@@ -496,7 +519,10 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	    g.setColor(m.color);
 	    g.fillOval((int)m.x-m.r, (int)m.y-m.r, m.r*2, m.r*2);
 	    // XXX
-	    //g.fillRect((int)m.x-m.r, (int)m.y-m.r, m.r*2, m.r*2);
+	    if(bigmols != null && m.mass >10){
+	    	g.setColor(Color.black);
+	        g.fillRect((int)m.x-m.r, (int)m.y-m.r, m.r*2, m.r*2+5);
+	    }
 	    gridRemove(m);
 	    gridAdd(m);
 	}
@@ -526,9 +552,9 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 		topWallVel = 0;
 	}
 	upperBound = (int) topWallPos;
-
-	int heatstateint = ((int) heatstate);
+	
 	/*
+	int heatstateint = ((int) heatstate);
 	if (heaterCheck.getState()) {
 	    for (j = 0; j != heaterSize; j++, heatstateint++) {
 		int x = heaterLeft + j*3;
@@ -572,6 +598,12 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	    Molecule q = checkCollision(m, grid[(int) (bigmol.x/gridEltWidth)][(int) (bigmol.y/gridEltHeight)]);
 	    if (q != null)	return q;
 	}
+	if (bigmols != null) {
+		for (int i=0; i<bigmols.length; i++) {
+			Molecule q = checkCollision(m, grid[(int) (bigmols[i].x/gridEltWidth)][(int) (bigmols[i].y/gridEltHeight)]);
+		    if (q != null)	return q;
+		}
+	}
 	int gx = (int) (m.x/gridEltWidth);
 	int gy = (int) (m.y/gridEltHeight);
 	int i, j;
@@ -587,11 +619,11 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 
   Molecule checkCollision(Molecule m, Molecule list) {
 	Molecule l = list.next;
-	int count = 0;
+	// int count = 0;
 	for (; !l.listHead; l = l.next) {
 	    if (m == l)
 		continue;
-	    count++;
+	    // count++;
 	    int mindist = m.r+l.r;
 	    double dx = m.x-l.x;
 	    double dy = m.y-l.y;
@@ -606,12 +638,19 @@ implements ComponentListener, ActionListener, AdjustmentListener,
   }
 
   void setColor(Molecule m) {
-	m.vel = Math.sqrt(m.dx*m.dx+m.dy*m.dy);
-	m.ke = .5*m.mass*m.vel*m.vel;
-	int col = (int) (m.ke*colorMult);
-	int maxcol = colors.length-1;
-	if (col > maxcol) col = maxcol;
-	m.color = colors[col];
+	if(bigmols != null && m.r >= winSize.getHeight()/30-1) { 
+		m.vel = Math.sqrt(m.dx*m.dx+m.dy*m.dy);
+		m.ke = .5*m.mass*m.vel*m.vel;
+		
+		m.color = Color.black;
+	}else{
+		m.vel = Math.sqrt(m.dx*m.dx+m.dy*m.dy);
+		m.ke = .5*m.mass*m.vel*m.vel;
+		int col = (int) (m.ke*colorMult);
+		int maxcol = colors.length-1;
+		if (col > maxcol) col = maxcol;
+		m.color = colors[col];
+	}
   }
 
   /*
@@ -829,7 +868,7 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	    initMolecules(SPEED_RANDOM);
 	    setMoleculeTypes(2, 1);
 	}
-	Setup createNext() { return new SetupTwoSections(); }
+	Setup createNext() { return new SetupBigMolecule(); }
   }
   /*
   class Setup1Equal extends Setup {
@@ -941,11 +980,11 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 	    setMoleculeTypes(1, 1);
 	}
 	double getVolume() { return .5; }
-	Setup createNext() { return new SetupTwoSections(); }
+	Setup createNext() { return new SetupBigMolecule(); }
   }
   */
-  class SetupTwoSections extends Setup {
-		String getName() { return "Two Sections"; }
+  class SetupBigMolecule extends Setup {
+		String getName() { return "Big Molecule"; }
 		void select() {
 		    speedBar = 70;
 		    colorBar = 210;
@@ -953,11 +992,41 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 		void reinit() {
 		    initMolecules(SPEED_RANDOM);
 		    bigmol = mols[0];
-		    bigmol.r = 30;
-		    bigmol.mass = bigmol.r*bigmol.r/2;
+		    bigmol.r = winSize.height/30-1;
+		    bigmol.mass = 30;
 		    bigmol.dx = bigmol.dy = 0;
 		    bigmol.vel = 0;
 		    
+		}
+		Setup createNext() { return new SetupThreeSections(); }
+  }
+  class SetupThreeSections extends Setup {
+		String getName() { return "Two Sections"; }
+		void select() {
+		    speedBar = 30;
+		}
+		void reinit() {
+		    initMolecules(SPEED_RANDOM);
+		    setMoleculeTypes(2, 1);
+		    int numBigMols = 20;
+		    bigmols = new Molecule[numBigMols];
+		    int w = winSize.width;
+		    int h = winSize.height;
+		    int r = h/30 -1;
+		    int[] startingPoints = {w/3, w/3, 2*w/3, 2*w/3, h/30, 7*h/10, h/30, 7*h/10};
+		    for (int i=0; i<4; i++) {
+		    	for (int j=0; j<5; j++) {
+		    		bigmols[i*5+j] = mols[i*5+j];
+			    	bigmols[i*5+j].r = r;
+			    	bigmols[i*5+j].mass = 99999999;
+			    	bigmols[i*5+j].dx = 0;
+			    	bigmols[i*5+j].dy = 0;
+			    	bigmols[i*5+j].vel = 0;
+			    	bigmols[i*5+j].ke = 0;
+			    	bigmols[i*5+j].x = startingPoints[i];
+			    	bigmols[i*5+j].y = startingPoints[i+4] + j*h/15;
+		    	}
+		    }
 		}
 		Setup createNext() { return null; }
   }
