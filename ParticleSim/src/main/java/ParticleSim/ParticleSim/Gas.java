@@ -1,18 +1,11 @@
 package ParticleSim.ParticleSim;
 
 import java.applet.Applet;
-// import java.awt.Button;
-// import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Image;
-// import java.awt.Label;
-// import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -27,24 +20,6 @@ import java.util.Random;
 import java.util.Vector;
 import static java.lang.Math.*;
 import java.lang.Math;
-
-import ParticleSim.ParticleSim.Gas.Molecule;
-import ParticleSim.ParticleSim.Gas.Setup;
-import ParticleSim.ParticleSim.Gas.Setup1Random;
-/*
-import ParticleSim.ParticleSim.Gas.Setup1Extreme;
-import ParticleSim.ParticleSim.Gas.Setup1Equal;
-import ParticleSim.ParticleSim.Gas.Setup1Single;
-import ParticleSim.ParticleSim.Gas.Setup1Small;
-import ParticleSim.ParticleSim.Gas.Setup2Equal;
-import ParticleSim.ParticleSim.Gas.Setup2Random;
-import ParticleSim.ParticleSim.Gas.Setup3Equal;
-import ParticleSim.ParticleSim.Gas.Setup3Random;
-import ParticleSim.ParticleSim.Gas.SetupBrownian;
-import ParticleSim.ParticleSim.Gas.SetupExpansion;
-*/
-import ParticleSim.ParticleSim.Gas.SetupBigMolecule;
-import ParticleSim.ParticleSim.Gas.SetupThreeSections;
 
 
 public class Gas extends Applet implements ComponentListener, ActionListener, AdjustmentListener, ItemListener {
@@ -71,7 +46,7 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
   Molecule bigmols[];
   
   double gravityBar = 0;
-  double speedBar = 20;
+  double speedBar = 5;
   double molCountBar = 500;
   double colorBar = 5;
   
@@ -170,7 +145,7 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 
   void initMolecules(int speed) {
     Dimension d = winSize = cv.getSize();
-	molCount 	= 1000;
+	molCount 	= 500;
 	upperBound 	= (int) (winSize.height*(1-setup.getVolume())-1);
 	topWallPos 	= upperBound;
 	areaHeight 	= winSize.height-upperBound;
@@ -196,12 +171,12 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 	    m.dy = java.lang.Math.sqrt(1-m.dx*m.dx);
 	    if (getrand(10) > 4)	m.dy = -m.dy;
 	    if (speed == SPEED_EXTREME) {
-			double q = ((i & 2) > 0) ? 3 : .1;
+			double q = ((i & 2) > 0) ? 2 : .1;
 			m.dx *= q;
 			m.dy *= q;
 	    }
 	    if (speed == SPEED_RANDOM) {
-			double q = getrand(101)/50.;
+			double q = getrand(101)/70.;
 			m.dx *= q;
 			m.dy *= q;
 	    }
@@ -260,13 +235,10 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 			lastSecT = t;
 	    }
 	    lastTime = sysTime;
-	// }
-	// else	lastTime = 0;
 	
 	for (short i = 0; i != molCount; i++) {
 	    Molecule m = mols[i];
 	    boolean bounce = false;
-	    
 	    j = 0;
 	    for (; j < 5; j++) {
 			m.dy += gravity*dt;
@@ -431,20 +403,17 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 	}
 	if (topWallPos > (winSize.height*4/5)) {
 	    topWallPos = (winSize.height*4/5);
-	    if (topWallVel > 0)
-		topWallVel = 0;
+	    if (topWallVel > 0)	topWallVel = 0;
 	}
 	upperBound = (int) topWallPos;
 	
 	
 	g.setColor(Color.lightGray);
-	g.drawRect(0, upperBound,
-		   winSize.width-1, winSize.height-1-upperBound);
+	g.drawRect(0, upperBound, winSize.width-1, winSize.height-1-upperBound);
 	g.fillRect(winSize.width/2 - 20, 0, 40, upperBound);
 	realg.drawImage(dbimage, 0, 0, this);
-	    heatstate += heaterMove;
-	    cv.repaint(pause);
-
+    heatstate += heaterMove;
+    cv.repaint(pause);
   }
 
   void gridAdd(Molecule m) {
@@ -517,11 +486,6 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 	}
   }
 
-  
-  double maxwellDist(double v, double mass) {
-	return (mass/temp)*v*Math.exp(-mass*v*v/(2*temp));
-  }
-	
   public void componentHidden(ComponentEvent e){}
   public void componentMoved(ComponentEvent e){}
   public void componentShown(ComponentEvent e){}
@@ -532,13 +496,9 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
   }
   public void actionPerformed(ActionEvent e) {
 	System.out.println(e);
-	
   }
   
-  public void adjustmentValueChanged(AdjustmentEvent e) {
-  	
-  }
-  
+  public void adjustmentValueChanged(AdjustmentEvent e) { }
   
   public void itemStateChanged(ItemEvent e) {
 	
@@ -604,8 +564,8 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 		void reinit() {
 		    initMolecules(SPEED_RANDOM);
 		    bigmol = mols[0];
-		    bigmol.r = winSize.height/30-1;
-		    bigmol.mass = 30;
+		    bigmol.r = winSize.height/15;
+		    bigmol.mass = 40;
 		    bigmol.dx = bigmol.dy = 0;
 		    bigmol.vel = 0;
 		    
