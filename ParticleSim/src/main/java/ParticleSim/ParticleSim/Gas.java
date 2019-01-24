@@ -25,7 +25,7 @@ import java.lang.Math;
 public class Gas extends Applet implements ComponentListener, ActionListener, AdjustmentListener, ItemListener {
   
   Thread engine = null;
-  int molCount;
+  int molCount = 500;
 
   Dimension winSize;
   Image dbimage;
@@ -145,7 +145,6 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 
   void initMolecules(int speed) {
     Dimension d = winSize = cv.getSize();
-	molCount 	= 500;
 	upperBound 	= (int) (winSize.height*(1-setup.getVolume())-1);
 	topWallPos 	= upperBound;
 	areaHeight 	= winSize.height-upperBound;
@@ -200,10 +199,10 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 			m.type = n;
 			if (n == 2) {
 			    m.r *= 3;
-			    m.mass *= 9; // was 27
+			    m.mass *= 9;
 			} else if (n == 1) {
 			    m.r *= 2;
-			    m.mass *= 4; // was 8
+			    m.mass *= 4;
 			}
 	    }
 	    setColor(m);
@@ -317,8 +316,6 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 			    double totmass = m.mass + m2.mass;
 			    double comdx = (m.mass*m.dx+m2.mass*m2.dx)/totmass;
 			    double comdy = (m.mass*m.dy+m2.mass*m2.dy)/totmass;
-			    //System.out.print("<x " + (m.dx-comdx) + " " + (m2.dx-comdx) + "\n");
-			    //System.out.print("<y " + (m.dy-comdy) + " " + (m2.dy-comdy) + "\n");
 	
 			    // subtract COM velocity from m's momentum and
 			    // project result onto the vector separating them.
@@ -344,8 +341,7 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 			    if(bigmols != null && m.mass >10 ||bigmols != null && m2.mass >10 ){
 			    	continue;
 			    }
-			    // adjust m2's momentum so that total momentum
-			    // is conserved
+			    // adjust m2's momentum so that total momentum is conserved
 			    double mult = m.mass/m2.mass;
 			    m2.dx += px*mult;
 			    m2.dy += py*mult;
@@ -376,8 +372,8 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
 	    	g.setColor(Color.black);
 	        g.fillRect((int) (m.x-m.r), (int) (m.y-m.r), m.r, m.r*2+5);
 	    }else{
-	    g.setColor(m.color);
-	    g.fillOval((int)m.x-m.r, (int)m.y-m.r, m.r*2, m.r*2);
+		    g.setColor(m.color);
+		    g.fillOval((int)m.x-m.r, (int)m.y-m.r, m.r*2, m.r*2);
 	    }
 	 
 	    gridRemove(m);
@@ -492,13 +488,12 @@ public class Gas extends Applet implements ComponentListener, ActionListener, Ad
   public void componentResized(ComponentEvent e) {
 	reinit(false);
 	cv.repaint(100);
-
   }
   public void actionPerformed(ActionEvent e) {
 	System.out.println(e);
   }
   
-  public void adjustmentValueChanged(AdjustmentEvent e) { }
+  public void adjustmentValueChanged(AdjustmentEvent e) {}
   
   public void itemStateChanged(ItemEvent e) {
 	
